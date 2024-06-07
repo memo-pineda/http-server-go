@@ -65,13 +65,14 @@ func HandleConnection(conn net.Conn) {
 	if endpoint == "files" {
 		fmt.Println("Reaching files endpoint")
 		filePath := endpoint + urlParts[2]
-		file, err := os.Open(filePath)
+		dir := os.Args[2]
+		file, err := os.Open(dir + filePath)
 		if errors.Is(err, os.ErrNotExist) {
 			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		} else {
 			fmt.Println("File exists")
 			data := make([]byte, 100)
-			count, err := file.Read(data)
+			count, err := file.Read([]byte(filePath))
 			if err != nil {
 				conn.Write([]byte("Trouble reading file" + err.Error()))
 			}
