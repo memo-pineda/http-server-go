@@ -63,7 +63,7 @@ func HandleConnection(conn net.Conn) {
 
 	if endpoint == "files" {
 		fmt.Println("Reaching files endpoint")
-		filePath := endpoint + "/" + urlParts[2]
+		filePath := "/" + urlParts[2]
 		dir := os.Args[2]
 		fmt.Println(dir + filePath)
 		file, err := os.ReadFile(dir + filePath)
