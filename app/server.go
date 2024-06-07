@@ -65,6 +65,7 @@ func HandleConnection(conn net.Conn) {
 		fmt.Println("Reaching files endpoint")
 		filePath := endpoint + urlParts[2]
 		dir := os.Args[2]
+		fmt.Println(dir + filePath)
 		file, err := os.ReadFile(dir + filePath)
 		if err != nil {
 			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
