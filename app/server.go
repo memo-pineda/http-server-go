@@ -44,9 +44,16 @@ func HandleConnection(conn net.Conn) {
 	}
 
 	urlParts := strings.Split(request.URL.Path, "/")
+	endpoint := urlParts[1]
 
-	if len(urlParts) > 1 && urlParts[1] == "echo" {
+	if len(urlParts) > 1 && endpoint == "echo" {
 		resp := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(urlParts[2]), urlParts[2])
+		conn.Write([]byte(resp))
+		return
+	}
+
+	if endpoint == "user-agent" {
+		resp := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(request.UserAgent()), request.UserAgent())
 		conn.Write([]byte(resp))
 		return
 	}
