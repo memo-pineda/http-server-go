@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -36,8 +37,18 @@ func HandleConnection(conn net.Conn) {
 	}
 
 	fmt.Printf("Request: %s %s\n", request.Method, request.URL.Path)
+
 	if request.URL.Path == "/" {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+		return
+	}
+
+	urlParts := strings.Split(request.URL.Path, "/")
+
+	if len(urlParts) > 1 && urlParts[1] == "echo" {
+		resp := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(urlParts[2]), urlParts[2])
+		conn.Write([]byte(resp))
+		return
 	}
 
 	conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
