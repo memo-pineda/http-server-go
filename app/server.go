@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -19,17 +20,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
-	}
+	var wg sync.WaitGroup
 
-	HandleConnection(conn)
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+
+		wg.Add(1)
+
+		go HandleConnection(conn, &wg)
+	}
 }
 
-func HandleConnection(conn net.Conn) {
+func HandleConnection(conn net.Conn, wg *sync.WaitGroup) {
+	defer wg.Done()
 	defer conn.Close()
+
 	request, err := http.ReadRequest(bufio.NewReader(conn))
 	if err != nil {
 		fmt.Println("Error reading request ", err.Error())
