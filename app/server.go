@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 )
 
 func main() {
@@ -20,8 +19,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	var wg sync.WaitGroup
-
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -29,14 +26,11 @@ func main() {
 			os.Exit(1)
 		}
 
-		wg.Add(1)
-
-		go HandleConnection(conn, &wg)
+		go HandleConnection(conn)
 	}
 }
 
-func HandleConnection(conn net.Conn, wg *sync.WaitGroup) {
-	defer wg.Done()
+func HandleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	request, err := http.ReadRequest(bufio.NewReader(conn))
