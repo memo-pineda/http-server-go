@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -59,6 +60,22 @@ func HandleConnection(conn net.Conn) {
 		resp := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(request.UserAgent()), request.UserAgent())
 		conn.Write([]byte(resp))
 		return
+	}
+
+	if endpoint == "files" {
+		filePath := endpoint + urlParts[2]
+		file, err := os.Open(filePath)
+		if errors.Is(err, os.ErrNotExist) {
+			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		} else {
+			data := make([]byte, 100)
+			count, err := file.Read(data)
+			if err != nil {
+				conn.Write([]byte("Trouble reading file" + err.Error()))
+			}
+			resp := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", count, data[:count])
+			conn.Write([]byte(resp))
+		}
 	}
 
 	conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
